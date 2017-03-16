@@ -1,5 +1,5 @@
 from rest_framework import generics
-from api.serializers import MessageSerializer
+from api.serializers import MessageSerializer, UserSerializer
 from api.models import Message
 from rest_framework import permissions
 
@@ -12,3 +12,10 @@ class MessageView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         """Save the post data when creating a new message."""
         serializer.save(author=self.request.user)
+
+class UserView(generics.CreateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save()
