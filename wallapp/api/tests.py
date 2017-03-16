@@ -9,7 +9,8 @@ from django.core.urlresolvers import reverse
 class MessageModelTest(TestCase):
 
     def setUp(self):
-        self.message = Message(body='message body')
+        self.user = User.objects.create(username="testuser")
+        self.message = Message(body='message body', author=self.user)
 
     def test_create_message(self):
         old_count = Message.objects.count()
@@ -25,9 +26,12 @@ class MessageModelTest(TestCase):
 class MessageViewTest(TestCase):
 
     def setUp(self):
+        self.user = User.objects.create(username="testuser")
         self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
         self.message_data = {
-            'body': 'my first message'
+            'body': 'my first message',
+            'author': self.user.username
         }
         self.response_post = self.client.post(
             reverse('messages'),
@@ -43,7 +47,7 @@ class MessageViewTest(TestCase):
         self.assertEqual(self.response_post.status_code, status.HTTP_201_CREATED)
 
     def test_api_message_create_body(self):
-        self.assertEqual(self.response_post.data, {'id': 1, 'body': self.message_data['body']})
+        self.assertEqual(self.response_post.data["body"], self.message_data['body'])
 
     def test_api_get_messages(self):
         self.assertEqual(self.response_get.status_code, status.HTTP_200_OK)
