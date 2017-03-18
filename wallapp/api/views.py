@@ -7,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.models import User
+from api.helpers import send_success_email
 
 class MessageView(generics.ListCreateAPIView):
     """This class defines the create behavior of our rest api."""
@@ -28,7 +29,9 @@ class UserView(generics.CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         token, created = Token.objects.get_or_create(user=serializer.instance)
+        send_success_email(serializer.instance)
         return Response({'token': token.key, 'username': serializer.instance.username}, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class CustomObtainAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
