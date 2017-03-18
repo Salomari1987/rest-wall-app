@@ -2,6 +2,9 @@ from rest_framework import generics
 from api.serializers import MessageSerializer, UserSerializer
 from api.models import Message
 from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework import status
 
 class MessageView(generics.ListCreateAPIView):
     """This class defines the create behavior of our rest api."""
@@ -17,5 +20,10 @@ class UserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = (permissions.AllowAny,)
 
-    def perform_create(self, serializer):
-        serializer.save()
+    def create(self, request, *args, **kwargs): # <- here i forgot self
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        token, created = Token.objects.get_or_create(user=serializer.instance)
+        return Response({'token': token.key, 'username': serializer.instance.username}, status=status.HTTP_201_CREATED, headers=headers)
