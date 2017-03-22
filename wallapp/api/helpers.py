@@ -8,5 +8,4 @@ def send_success_email (user):
             .format(username=user.username, password=user.password),
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
-            fail_silently=False
-        )
+            fail_silently=False)
