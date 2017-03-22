@@ -29,7 +29,8 @@ class UserView(generics.CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         token, created = Token.objects.get_or_create(user=serializer.instance)
-        send_success_email(serializer.instance)
+        if serializer.instance.email:
+            send_success_email(serializer.instance)
         return Response({'token': token.key, 'username': serializer.instance.username}, status=status.HTTP_201_CREATED, headers=headers)
 
 
